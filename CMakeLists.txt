@@ -2,7 +2,12 @@ cmake_minimum_required (VERSION 3.24 FATAL_ERROR)
 
 project(Game)
 
-add_executable(Game src/main.cpp)
+set(CMAKE_CXX_STANDART 17)
+add_executable(Game 
+	src/main.cpp
+	src/Renderer/ShaderProgram.cpp
+	src/Renderer/ShaderProgram.h
+)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
