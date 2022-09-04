@@ -1,14 +1,18 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include "Renderer/ShaderProgram.h"
 #include "Resources/ResourceManager.h"
 #include "Renderer/Texture2D.h"
+#include "Renderer/Sprite.h"
 
 GLfloat point[] = {
-    0.5f,-0.5f, 0.0f,
-   -0.5f,-0.5f, 0.0f,
-    0.0f, 0.5f, 0.0f
+     0.0f, 50.0f, 0.0f,
+    50.0f,-50.0f, 0.0f,
+   -50.0f,-50.0f, 0.0f
 };
 GLfloat color[] = {
     1.0f, 0.0f, 0.0f,
@@ -16,18 +20,18 @@ GLfloat color[] = {
     0.0f, 0.0f, 1.0f
 };
 GLfloat texture[] = {
-    0.0f, 0.0f,
+    0.5f, 1.0f,
     1.0f, 0.0f,
-    0.5f, 1.0f
+    0.0f, 0.0f
 };
 
-int g_windowX = 640;
-int g_windowY = 480;
+glm::ivec2 g_window(640, 480);
+
 
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height) {
-    g_windowX = width;
-    g_windowY = height;
-    glViewport(0, 0, g_windowX, g_windowY);
+    g_window.x = width;
+    g_window.y = height;
+    glViewport(0, 0, g_window.x, g_window.y);
 }
 
 void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mode) {
@@ -48,7 +52,7 @@ int main(int argc, char** argv){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* PWindow = glfwCreateWindow(g_windowX, g_windowY, "Game", NULL, NULL);
+    GLFWwindow* PWindow = glfwCreateWindow(g_window.x, g_window.y, "Game", NULL, NULL);
 
     if (!PWindow){
         glfwTerminate();
@@ -78,7 +82,16 @@ int main(int argc, char** argv){
             return -1;
         }
 
+        auto pSpriteShaderProgram = resManager.loadShader("SpriteShader", "res/shaders/vSprite.txt", "res/shaders/fSprite.txt");
+        if (!pSpriteShaderProgram) {
+            std::cerr << "IDINAHUY SpriteShader" << std::endl;
+            return -1;
+        }
+
         auto tex = resManager.loadTexture("Def", "res/textures/RPSF.png");
+
+        auto pSprite = resManager.loadSprite("newSprite", "Def", "SpriteShader", 50, 50);
+        pSprite->setPosition(glm::vec2(300, 100));
 
         GLuint points_vbo = 0;
         glGenBuffers(1, &points_vbo);
@@ -112,7 +125,21 @@ int main(int argc, char** argv){
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         pDefaultShaderProgram->use();
-        pDefaultShaderProgram->setInt("tex",0);
+        pDefaultShaderProgram->setInt("tex", 0);
+
+        glm::mat4 modelMatrix_1 = glm::mat4(1.f);
+        modelMatrix_1 = glm::translate(modelMatrix_1, glm::vec3(50.f, 430.f, 0.f));
+
+        glm::mat4 modelMatrix_2 = glm::mat4(1.f);
+        modelMatrix_2 = glm::translate(modelMatrix_2, glm::vec3(590.f, 50.f, 0.f));
+
+        glm::mat4 projectionMatrix = glm::ortho(0.f, static_cast<float>(g_window.x), 0.f, static_cast<float>(g_window.y), -100.f, 100.f);
+        
+        pDefaultShaderProgram->setMatrix4("projectionMat", projectionMatrix);
+
+        pSpriteShaderProgram->use();
+        pSpriteShaderProgram->setInt("tex", 0);
+        pSpriteShaderProgram->setMatrix4("projectionMat", projectionMatrix);
 
         while (!glfwWindowShouldClose(PWindow)) {
             glClear(GL_COLOR_BUFFER_BIT);
@@ -120,7 +147,13 @@ int main(int argc, char** argv){
             pDefaultShaderProgram->use();
             glBindVertexArray(vao);
             tex->bind();
+            pDefaultShaderProgram->setMatrix4("modelMat", modelMatrix_1);
             glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            pDefaultShaderProgram->setMatrix4("modelMat", modelMatrix_2);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+            pSprite->render();
 
             glfwSwapBuffers(PWindow);
             glfwPollEvents();
