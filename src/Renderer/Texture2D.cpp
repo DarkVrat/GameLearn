@@ -35,7 +35,7 @@ namespace Renderer {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	Texture2D& Texture2D::operator=(Texture2D&& texture2d) {
+	Texture2D& Texture2D::operator=(Texture2D&& texture2d) noexcept {
 		glDeleteTextures(1, &m_ID);
 		m_ID = texture2d.m_ID;
 		texture2d.m_ID = 0;
@@ -45,7 +45,7 @@ namespace Renderer {
 		return *this;
 	}
 
-	Texture2D::Texture2D(Texture2D&& texture2d) {
+	Texture2D::Texture2D(Texture2D&& texture2d) noexcept {
 		m_ID = texture2d.m_ID;
 		texture2d.m_ID = 0;
 		m_mode = texture2d.m_mode;
@@ -59,5 +59,18 @@ namespace Renderer {
 
 	void Texture2D::bind() const {
 		glBindTexture(GL_TEXTURE_2D, m_ID);
+	}
+
+	void Texture2D::addSubTexture(std::string name, const const glm::vec2& _leftBottomUV, const glm::vec2& _rightTopUV) {
+		m_subTexture.emplace(std::move(name), SubTexture2D(_leftBottomUV, _rightTopUV));
+	}
+
+	const Texture2D::SubTexture2D& Texture2D::getSubTexture2D(const std::string& name) const {
+		auto it = m_subTexture.find(name);
+		if (it != m_subTexture.end()) {
+			return it->second;
+		}
+		const static SubTexture2D defaultSubTex;
+		return defaultSubTex;
 	}
 }

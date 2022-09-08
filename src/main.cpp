@@ -3,30 +3,15 @@
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <chrono>
 #include <iostream>
 #include "Renderer/ShaderProgram.h"
 #include "Resources/ResourceManager.h"
 #include "Renderer/Texture2D.h"
 #include "Renderer/Sprite.h"
-
-GLfloat point[] = {
-     0.0f, 50.0f, 0.0f,
-    50.0f,-50.0f, 0.0f,
-   -50.0f,-50.0f, 0.0f
-};
-GLfloat color[] = {
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
-};
-GLfloat texture[] = {
-    0.5f, 1.0f,
-    1.0f, 0.0f,
-    0.0f, 0.0f
-};
+#include "Renderer/AnimSprite.h"
 
 glm::ivec2 g_window(640, 480);
-
 
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height) {
     g_window.x = width;
@@ -90,70 +75,42 @@ int main(int argc, char** argv){
 
         auto tex = resManager.loadTexture("Def", "res/textures/RPSF.png");
 
-        auto pSprite = resManager.loadSprite("newSprite", "Def", "SpriteShader", 50, 50);
+        std::vector<std::string> subTextureNames = { "sci", "roc", "fuc", "pap"};
+        auto pTextAtlas = resManager.loadTextureAtlas("DefAtlas", "res/textures/RPSF.png", subTextureNames, 32, 32);
+
+        auto pSprite = resManager.loadSprite("newSprite", "DefAtlas", "SpriteShader", 64, 64, "fuc");
         pSprite->setPosition(glm::vec2(300, 100));
 
-        GLuint points_vbo = 0;
-        glGenBuffers(1, &points_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(point), point, GL_STATIC_DRAW);
+        auto pAnimSprite = resManager.loadAnimSprite("newAnimSprite", "DefAtlas", "SpriteShader", 64, 64, "sci");
+        std::vector<std::pair<std::string, uint64_t>> anime;
+        anime.emplace_back(std::make_pair<std::string, uint64_t>("sci", 125000000));
+        anime.emplace_back(std::make_pair<std::string, uint64_t>("roc", 125000000));
+        anime.emplace_back(std::make_pair<std::string, uint64_t>("fuc", 125000000));
+        anime.emplace_back(std::make_pair<std::string, uint64_t>("pap", 125000000));
 
-        GLuint color_vbo = 0;
-        glGenBuffers(1, &color_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
+        pAnimSprite->insertState("anime", std::move(anime));
 
-        GLuint text_vbo = 0;
-        glGenBuffers(1, &text_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(texture), texture, GL_STATIC_DRAW);
-
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, text_vbo);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        pDefaultShaderProgram->use();
-        pDefaultShaderProgram->setInt("tex", 0);
-
-        glm::mat4 modelMatrix_1 = glm::mat4(1.f);
-        modelMatrix_1 = glm::translate(modelMatrix_1, glm::vec3(50.f, 430.f, 0.f));
-
-        glm::mat4 modelMatrix_2 = glm::mat4(1.f);
-        modelMatrix_2 = glm::translate(modelMatrix_2, glm::vec3(590.f, 50.f, 0.f));
+        pAnimSprite->setState("anime");
+        pAnimSprite->setPosition(glm::vec2(100, 100));
 
         glm::mat4 projectionMatrix = glm::ortho(0.f, static_cast<float>(g_window.x), 0.f, static_cast<float>(g_window.y), -100.f, 100.f);
-        
-        pDefaultShaderProgram->setMatrix4("projectionMat", projectionMatrix);
 
         pSpriteShaderProgram->use();
         pSpriteShaderProgram->setInt("tex", 0);
         pSpriteShaderProgram->setMatrix4("projectionMat", projectionMatrix);
 
+        auto lastTime = std::chrono::high_resolution_clock::now();
+
         while (!glfwWindowShouldClose(PWindow)) {
+            auto currTime = std::chrono::high_resolution_clock::now();
+            uint64_t dura = std::chrono::duration_cast<std::chrono::nanoseconds>(currTime - lastTime).count();
+            pAnimSprite->update(dura);
+            lastTime = currTime;
+
             glClear(GL_COLOR_BUFFER_BIT);
 
-            pDefaultShaderProgram->use();
-            glBindVertexArray(vao);
-            tex->bind();
-            pDefaultShaderProgram->setMatrix4("modelMat", modelMatrix_1);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-
-            pDefaultShaderProgram->setMatrix4("modelMat", modelMatrix_2);
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-
             pSprite->render();
+            pAnimSprite->render();
 
             glfwSwapBuffers(PWindow);
             glfwPollEvents();

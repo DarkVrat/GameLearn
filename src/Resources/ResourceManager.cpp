@@ -2,6 +2,7 @@
 #include "../Renderer/ShaderProgram.h"
 #include "../Renderer/Texture2D.h"
 #include "../Renderer/Sprite.h"
+#include "../Renderer/AnimSprite.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -71,11 +72,11 @@ std::shared_ptr<Renderer::Texture2D> ResourceManager::loadTexture(const std::str
 	}
 
 	std::shared_ptr<Renderer::Texture2D> newTexture = m_textures.emplace(textureName, std::make_shared<Renderer::Texture2D>(widht,
-																																	  height,
-																																	  pixels, 
-																																	  channels,
-																																	   GL_NEAREST,
-																																	   GL_CLAMP_TO_EDGE)).first->second;
+																															height,
+																															pixels, 
+																															channels,
+																															GL_NEAREST,
+																															GL_CLAMP_TO_EDGE)).first->second;
 	stbi_image_free(pixels);
 
 	return newTexture;
@@ -94,7 +95,8 @@ std::shared_ptr<Renderer::Sprite> ResourceManager::loadSprite(	const std::string
 																const std::string& textureName, 
 																const std::string& shaderName, 
 																const unsigned int spriteWidth, 
-																const unsigned int spriteHeight){
+																const unsigned int spriteHeight,
+																const std::string& subTextureName){
 
 	auto pTexture = getTexture(textureName);
 	if (!pTexture) {
@@ -106,8 +108,9 @@ std::shared_ptr<Renderer::Sprite> ResourceManager::loadSprite(	const std::string
 		std::cerr << "Cant find the shaderName " << shaderName << " for sprite " << spriteName << std::endl;
 	}
 
-	std::shared_ptr<Renderer::Sprite> newSprite = m_sprite.emplace(	spriteName, 
+	std::shared_ptr<Renderer::Sprite> newSprite = m_sprite.emplace(textureName,
 																	std::make_shared<Renderer::Sprite>(pTexture,
+																										    subTextureName,		
 																											pShader,
 																											glm::vec2(0.f, 0.f),
 																											glm::vec2(spriteWidth, spriteHeight),
@@ -123,4 +126,66 @@ std::shared_ptr<Renderer::Sprite> ResourceManager::getSprite(const std::string& 
 	}
 	std::cerr << "Cant find the spriteName " << spriteName << std::endl;
 	return nullptr;
+}
+
+std::shared_ptr<Renderer::AnimSprite> ResourceManager::loadAnimSprite(	const std::string& animSpriteName, 
+																		const std::string& textureName, 
+																		const std::string& shaderName, 
+																		const unsigned int spriteWidth, 
+																		const unsigned int spriteHeight, 
+																		const std::string& subTextureName){
+	auto pTexture = getTexture(textureName);
+	if (!pTexture) {
+		std::cerr << "Cant find the textureName " << textureName << " for sprite " << animSpriteName << std::endl;
+	}
+
+	auto pShader = getShader(shaderName);
+	if (!pShader) {
+		std::cerr << "Cant find the shaderName " << shaderName << " for sprite " << animSpriteName << std::endl;
+	}
+
+	std::shared_ptr<Renderer::AnimSprite> newSprite = m_animSprite.emplace(	textureName,
+																			std::make_shared<Renderer::AnimSprite>(	pTexture,
+																													subTextureName,
+																													pShader,
+																													glm::vec2(0.f, 0.f),
+																													glm::vec2(spriteWidth, spriteHeight),
+																													0.f)).first->second;
+	return newSprite;
+}
+
+std::shared_ptr<Renderer::AnimSprite> ResourceManager::getAnimSprite(const std::string& animSpriteName){
+	auto it = m_animSprite.find(animSpriteName);
+	if (it != m_animSprite.end()) {
+		return it->second;
+	}
+	std::cerr << "Cant find the spriteName " << animSpriteName << std::endl;
+	return nullptr;
+}
+
+std::shared_ptr<Renderer::Texture2D> ResourceManager::loadTextureAtlas(	std::string textureName,
+																		std::string texturePatn,
+																		std::vector<std::string> subTextures,
+																		const unsigned subWidth,
+																		const unsigned subHeigth) {
+	auto pTexture = loadTexture(std::move(textureName), std::move(texturePatn));
+	if (pTexture) {
+		const unsigned int textureWidth = pTexture->getWidth();
+		const unsigned int textureHeight = pTexture->getHeight();
+		unsigned int currentTexOffsetX = 0;
+		unsigned int currentTexOffsetY = textureHeight;
+
+		for (auto& currentSubTexName : subTextures) {
+			glm::vec2 leftBottomUV(	static_cast<float>(currentTexOffsetX)/textureWidth,				static_cast<float>(currentTexOffsetY-subHeigth)/textureHeight);
+			glm::vec2 rightTopUV(	static_cast<float>(currentTexOffsetX+ subHeigth)/textureWidth,	static_cast<float>(currentTexOffsetY)/textureHeight);
+			pTexture->addSubTexture(std::move(currentSubTexName), leftBottomUV, rightTopUV);
+			
+			currentTexOffsetX += subWidth;
+			if (currentTexOffsetX >= textureWidth) {
+				currentTexOffsetX = 0;
+				currentTexOffsetY -= subHeigth;
+			}
+		}
+	}
+	return pTexture;
 }
