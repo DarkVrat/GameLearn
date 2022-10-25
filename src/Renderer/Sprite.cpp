@@ -10,51 +10,44 @@ namespace Renderer {
 		//установка координат вертексов текстуры 
 		const GLfloat vertexCoords[] = {
 			//x    y
-			0.f, 0.f,//1.1				2-----3  1
-			0.f, 1.f,//1.2				|    /  /|
-			1.f, 1.f,//1.3				| 1 /  / |
-					 //					|  /  /  |
-			1.f, 1.f,//2.1				| /  / 2 |
-			1.f, 0.f,//2.2				|/  /    |
-			0.f, 0.f //2.3				1  3-----2
+			0.f, 0.f,//0				1--2
+			0.f, 1.f,//1				| /|
+			1.f, 1.f,//2				|/ |
+			1.f, 0.f,//3				0--3
 		};
 		auto subTexture = m_pTexture->getSubTexture2D(std::move(initialSubTexture)); //загрузка подтекстуры или всей текстуры
 		//установка координат текстуры к вертексам
 		const GLfloat textureCoords[] = {
 			//U						   //V
-			subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,	//1.1
-			subTexture.leftBottomUV.x, subTexture.rightTopUV.y,		//1.2
-			subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//1.3
-																	//
-			subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//2.1
-			subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,	//2.2
-			subTexture.leftBottomUV.x, subTexture.leftBottomUV.y	//2.3
+			subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,	//0
+			subTexture.leftBottomUV.x, subTexture.rightTopUV.y,		//1
+			subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//2
+			subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,	//3
 		};
 
-		glGenVertexArrays(1, &m_VAO); //создание добавление 1 вертексного массива в массив, и передача её номера в m_ID 
-		glBindVertexArray(m_VAO); //связка на вертексный массив
+		const GLint indices[] = {
+			0, 1, 2,
+			2, 3, 0
+		};
 
-		glGenBuffers(1, &m_vartexCoordsVBO); //создание вертексного буфера
-		glBindBuffer(GL_ARRAY_BUFFER, m_vartexCoordsVBO); //связка к буферу
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertexCoords), &vertexCoords, GL_STATIC_DRAW); //загрузка вертексного массива
-		glEnableVertexAttribArray(0); //Включение буфера 0
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr); //установка параметров 0 буфера, 2 числа на 1 вертекс, float тип, параметр нормализации (то есть перевод из int в float), смещение между данными, и смещение к первому элементу 
+		m_vertexCoordsBuffer.init(vertexCoords, sizeof(vertexCoords));
+		VertexBufferLayout vertexCoordsLayout;
+		vertexCoordsLayout.addElementLayoutFloat(2, false);
+		m_vertexArray.addBuffer(m_vertexCoordsBuffer, vertexCoordsLayout);
 
-		glGenBuffers(1, &m_textureCoordsVBO); //так же как и для вертексного
-		glBindBuffer(GL_ARRAY_BUFFER, m_textureCoordsVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(textureCoords), &textureCoords, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+		m_textureCoordsBuffer.init(textureCoords, sizeof(textureCoords));
+		VertexBufferLayout textureCoordsLayout;
+		textureCoordsLayout.addElementLayoutFloat(2, false);
+		m_vertexArray.addBuffer(m_textureCoordsBuffer, textureCoordsLayout);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);//отмена привязки к буферу
-		glBindVertexArray(0);//отмена привязки к вертексному массиву
+		m_indexBuffer.init(indices, sizeof(indices));
+
+		m_vertexArray.unbind();
+		m_indexBuffer.unbind();
 	}
 
 	//очистка буферов
 	Sprite::~Sprite() {
-		glDeleteBuffers(1, &m_vartexCoordsVBO);
-		glDeleteBuffers(1, &m_textureCoordsVBO);
-		glDeleteVertexArrays(1, &m_VAO);
 	}
 
 	//отрисовка спрайта
@@ -70,14 +63,14 @@ namespace Renderer {
 		model = glm::translate(model, glm::vec3(-0.5f * m_size.x, -0.5f * m_size.y, 0.f));
 		model = glm::scale(model, glm::vec3(m_size, 1.f));
 
-		glBindVertexArray(m_VAO);//связка на вертексный массив
+		m_vertexArray.bind();
 		m_pShaderProgram->setMatrix4("modelMat", model);//передача полученой матрицы в шейдер
 
 		glActiveTexture(GL_TEXTURE0);//установка текстуры
 		m_pTexture->bind();//установка таргета на текстуру в памяти
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);//отрисовка 2 треугольников
-		glBindVertexArray(0);//освобождение привязки
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,nullptr);
+		m_vertexArray.unbind();
 	}
 
 	//установка позиции

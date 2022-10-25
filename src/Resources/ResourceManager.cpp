@@ -10,14 +10,28 @@
 #define STBI_ONLY_PNG
 #include "stb_image.h"
 
-//Конструктор получающий argv[0] в main для получения пути к игре
-ResourceManager::ResourceManager(const std::string& executablePath) {
+ResourceManager::SpriteMap ResourceManager::m_sprite;
+ResourceManager::TexturesMap ResourceManager::m_textures;
+ResourceManager::AnimSpriteMap ResourceManager::m_animSprite;
+ResourceManager::ShaderProgramsMap ResourceManager::m_shaderPrograms;
+
+std::string ResourceManager::m_path;
+
+//Метод получающий argv[0] в main для получения пути к игре
+void ResourceManager::setExecutablePath(const std::string& executablePath){
 	size_t found = executablePath.find_last_of("/\\");
 	m_path = executablePath.substr(0, found);
 }
 
+void ResourceManager::unloadAllRes(){
+	m_animSprite.clear();
+	m_shaderPrograms.clear();
+	m_sprite.clear();
+	m_textures.clear();
+}
+
 //функция получения данных из файла
-std::string ResourceManager::getFileString(const std::string& relativeFilePath) const {
+std::string ResourceManager::getFileString(const std::string& relativeFilePath)  {
 	std::ifstream f;
 	f.open(m_path + "/" + relativeFilePath.c_str(), std::ios::in | std::ios::binary);
 	if (!f.is_open()) {
@@ -106,7 +120,7 @@ std::shared_ptr<Renderer::Sprite> ResourceManager::loadSprite(const std::string&
 	if (!pShader) std::cerr << "Cant find the shaderName " << shaderName << " for sprite " << spriteName << std::endl;
 	
 	//создание спрайта и возврат указателя на спрайт
-	std::shared_ptr<Renderer::Sprite> newSprite = m_sprite.emplace(textureName,std::make_shared<Renderer::Sprite>(pTexture,subTextureName,pShader,glm::vec2(0.f, 0.f),glm::vec2(spriteWidth, spriteHeight),0.f)).first->second;
+	std::shared_ptr<Renderer::Sprite> newSprite = m_sprite.emplace(spriteName,std::make_shared<Renderer::Sprite>(pTexture,subTextureName,pShader,glm::vec2(0.f, 0.f),glm::vec2(spriteWidth, spriteHeight),0.f)).first->second;
 	return newSprite;
 }
 
@@ -133,7 +147,7 @@ std::shared_ptr<Renderer::AnimSprite> ResourceManager::loadAnimSprite(const std:
 	if (!pShader) std::cerr << "Cant find the shaderName " << shaderName << " for sprite " << animSpriteName << std::endl;
 	
 	//Создание и передача анимационного спрайта
-	std::shared_ptr<Renderer::AnimSprite> newSprite = m_animSprite.emplace(textureName,std::make_shared<Renderer::AnimSprite>(	pTexture,subTextureName,pShader,glm::vec2(0.f, 0.f),glm::vec2(spriteWidth, spriteHeight),0.f)).first->second;
+	std::shared_ptr<Renderer::AnimSprite> newSprite = m_animSprite.emplace(animSpriteName,std::make_shared<Renderer::AnimSprite>(	pTexture,subTextureName,pShader,glm::vec2(0.f, 0.f),glm::vec2(spriteWidth, spriteHeight),0.f)).first->second;
 	return newSprite;
 }
 
@@ -171,3 +185,5 @@ std::shared_ptr<Renderer::Texture2D> ResourceManager::loadTextureAtlas(std::stri
 	}
 	return pTexture;//Возврат тектуры
 }
+
+

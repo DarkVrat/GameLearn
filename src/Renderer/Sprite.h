@@ -4,6 +4,9 @@
 #include<glm/vec2.hpp>
 #include<memory>
 #include<string>
+#include"VertexBuffer.h"
+#include"VertexArray.h"
+#include"IndexBuffer.h"
 
 namespace Renderer {
 	class Texture2D;
@@ -34,9 +37,10 @@ namespace Renderer {
 		glm::vec2 m_size;
 		float m_rotation;
 
-		//ID буферов
-		GLuint m_VAO;
-		GLuint m_vartexCoordsVBO;
-		GLuint m_textureCoordsVBO;
+		//буферы
+		VertexArray m_vertexArray;
+		VertexBuffer m_vertexCoordsBuffer;
+		VertexBuffer m_textureCoordsBuffer;
+		IndexBuffer m_indexBuffer;
 	};
 }

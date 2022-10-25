@@ -13,9 +13,21 @@ add_executable(${PROJECT}
 	src/Renderer/Sprite.h
 	src/Renderer/AnimSprite.cpp
 	src/Renderer/AnimSprite.h
+	src/Renderer/VertexBuffer.cpp
+	src/Renderer/VertexBuffer.h
+	src/Renderer/VertexBufferLayout.cpp
+	src/Renderer/VertexBufferLayout.h
+	src/Renderer/VertexArray.cpp
+	src/Renderer/VertexArray.h
+	src/Renderer/IndexBuffer.cpp
+	src/Renderer/IndexBuffer.h
+	
 	src/Resources/ResourceManager.cpp
 	src/Resources/ResourceManager.h
-	src/Resources/stb_image.h
+	src/Resources/stb_image.h 
+	
+	src/GameClass/MainGameClass.cpp
+	src/GameClass/MainGameClass.h
 )
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)

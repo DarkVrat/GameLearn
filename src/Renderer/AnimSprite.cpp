@@ -46,18 +46,13 @@ namespace Renderer {
 			auto subTexture = m_pTexture->getSubTexture2D(m_pCurrAnimDura->second[m_currentFrame].first);//получение текстуры
 			const GLfloat textureCoords[] = { //Установка координат
 				//U							V
-				subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,	//1.1
-				subTexture.leftBottomUV.x, subTexture.rightTopUV.y,		//1.2
-				subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//1.3
-																		//
-				subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//2.1
-				subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,	//2.2
-				subTexture.leftBottomUV.x, subTexture.leftBottomUV.y	//2.3
+				subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,	//0
+				subTexture.leftBottomUV.x, subTexture.rightTopUV.y,		//1
+				subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//2
+				subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,	//3
 			};
 			//Привязка к буферу и загрузка нового массива
-			glBindBuffer(GL_ARRAY_BUFFER, m_textureCoordsVBO);
-			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(textureCoords), &textureCoords);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			m_textureCoordsBuffer.update(textureCoords, sizeof(textureCoords));
 
 			m_dirty = false;//Возврат m_dirty что бы не менять спрайт
 		}
