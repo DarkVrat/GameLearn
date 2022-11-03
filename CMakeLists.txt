@@ -11,8 +11,8 @@ add_executable(${PROJECT}
 	src/Renderer/Texture2D.h
 	src/Renderer/Sprite.cpp
 	src/Renderer/Sprite.h
-	src/Renderer/AnimSprite.cpp
-	src/Renderer/AnimSprite.h
+	src/Renderer/StateAnimation.cpp
+	src/Renderer/StateAnimation.h
 	src/Renderer/VertexBuffer.cpp
 	src/Renderer/VertexBuffer.h
 	src/Renderer/VertexBufferLayout.cpp
@@ -21,6 +21,8 @@ add_executable(${PROJECT}
 	src/Renderer/VertexArray.h
 	src/Renderer/IndexBuffer.cpp
 	src/Renderer/IndexBuffer.h
+	src/Renderer/RenderEngine.cpp
+	src/Renderer/RenderEngine.h
 	
 	src/Resources/ResourceManager.cpp
 	src/Resources/ResourceManager.h
@@ -28,6 +30,8 @@ add_executable(${PROJECT}
 	
 	src/GameClass/MainGameClass.cpp
 	src/GameClass/MainGameClass.h
+	src/GameClass/GameObject.cpp
+	src/GameClass/GameObject.h
 )
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)
@@ -44,6 +48,8 @@ add_subdirectory(external/glad)
 target_link_libraries(${PROJECT} glad)
 
 include_directories(external/glm)
+
+include_directories(external/rapidjson/include)
 
 set_target_properties(${PROJECT} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
 

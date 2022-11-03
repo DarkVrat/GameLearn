@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <array>
 #include <glm/vec2.hpp>
+#include "GameObject.h"
 
 class MainGameClass {
 public:
@@ -9,7 +10,6 @@ public:
 	~MainGameClass();
 
 	void render();
-	void update(const uint64_t delta);
 	void setKey(const int key,const int action);
 	bool init();
 

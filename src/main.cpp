@@ -7,16 +7,17 @@
 #include <iostream>
 #include "Resources/ResourceManager.h"
 #include "GameClass/MainGameClass.h"
+#include "Renderer/RenderEngine.h"
 
 //Размер окна
-glm::ivec2 g_window(640, 480);
+glm::ivec2 g_window(1280, 720);
 MainGameClass g_Game(g_window);
 
 //При измении окна
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height) {
     g_window.x = width;
     g_window.y = height;
-    glViewport(0, 0, g_window.x, g_window.y);
+    Renderer::RenderEngine::setViewport(g_window.x, g_window.y);
 }
 
 //проверка нажатия кнопок
@@ -59,10 +60,10 @@ int main(int argc, char** argv){
 	}
 
     //Вывод версии
-    std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
-    std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "Renderer: " << Renderer::RenderEngine::getRender() << std::endl;
+    std::cout << "OpenGL version: " << Renderer::RenderEngine::getVersion() << std::endl;
 
-	glClearColor(0.5,0.5,0.5,1);//цвет заполнения
+    Renderer::RenderEngine::setClearColor(0.5f, 0.5f, 0.5f, 1.0f);//цвет заполнения
     {
         ResourceManager::setExecutablePath(argv[0]);//Передача пути к программе
        
@@ -74,13 +75,10 @@ int main(int argc, char** argv){
         while (!glfwWindowShouldClose(PWindow)) {
             auto currTime = std::chrono::high_resolution_clock::now();//Обновление таймера
             uint64_t dura = std::chrono::duration_cast<std::chrono::nanoseconds>(currTime - lastTime).count();//Просчёт изменившегося времени
-            
-            g_Game.update(dura);
-
             lastTime = currTime;//сдвиг таймера
 
             //Заполнение цветом указаном в glClearColor
-            glClear(GL_COLOR_BUFFER_BIT);
+            Renderer::RenderEngine::clear();
 
             g_Game.render();
 

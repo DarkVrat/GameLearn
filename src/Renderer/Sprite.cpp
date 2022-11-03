@@ -1,90 +1,84 @@
 #include "Sprite.h"
+
 #include "ShaderProgram.h"
 #include "Texture2D.h"
+#include "RenderEngine.h"
+
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace Renderer {
-	Sprite::Sprite(std::shared_ptr<Texture2D> pTexture, std::string initialSubTexture, std::shared_ptr<ShaderProgram> pShaderProgram, const glm::vec2& position, const glm::vec2& size, const float rotation)
-		:m_pTexture(pTexture), m_pShaderProgram(std::move(pShaderProgram)), m_position(position), m_size(size), m_rotation(rotation) {
-		//установка координат вертексов текстуры 
-		const GLfloat vertexCoords[] = {
-			//x    y
-			0.f, 0.f,//0				1--2
-			0.f, 1.f,//1				| /|
-			1.f, 1.f,//2				|/ |
-			1.f, 0.f,//3				0--3
-		};
-		auto subTexture = m_pTexture->getSubTexture2D(std::move(initialSubTexture)); //загрузка подтекстуры или всей текстуры
-		//установка координат текстуры к вертексам
-		const GLfloat textureCoords[] = {
-			//U						   //V
-			subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,	//0
-			subTexture.leftBottomUV.x, subTexture.rightTopUV.y,		//1
-			subTexture.rightTopUV.x,   subTexture.rightTopUV.y,		//2
-			subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,	//3
-		};
 
-		const GLint indices[] = {
-			0, 1, 2,
-			2, 3, 0
-		};
+    Sprite::Sprite(std::shared_ptr<Texture2D> pTexture,
+        std::string initialSubTexture,
+        std::shared_ptr<ShaderProgram> pShaderProgram)
+        : m_pTexture(std::move(pTexture))
+        , m_pShaderProgram(std::move(pShaderProgram))
+    {
+        const GLfloat vertexCoords[] = {
+            // 1---2
+            // | / |
+            // 0  -3
 
-		m_vertexCoordsBuffer.init(vertexCoords, sizeof(vertexCoords));
-		VertexBufferLayout vertexCoordsLayout;
-		vertexCoordsLayout.addElementLayoutFloat(2, false);
-		m_vertexArray.addBuffer(m_vertexCoordsBuffer, vertexCoordsLayout);
+            // X  Y
+            0.f, 0.f,
+            0.f, 1.f,
+            1.f, 1.f,
+            1.f, 0.f
+        };
 
-		m_textureCoordsBuffer.init(textureCoords, sizeof(textureCoords));
-		VertexBufferLayout textureCoordsLayout;
-		textureCoordsLayout.addElementLayoutFloat(2, false);
-		m_vertexArray.addBuffer(m_textureCoordsBuffer, textureCoordsLayout);
+        auto subTexture = m_pTexture->getSubTexture2D(std::move(initialSubTexture));
 
-		m_indexBuffer.init(indices, sizeof(indices));
+        const GLfloat textureCoords[] = {
+            // U  V
+            subTexture.leftBottomUV.x, subTexture.leftBottomUV.y,
+            subTexture.leftBottomUV.x, subTexture.rightTopUV.y,
+            subTexture.rightTopUV.x,   subTexture.rightTopUV.y,
+            subTexture.rightTopUV.x,   subTexture.leftBottomUV.y,
+        };
 
-		m_vertexArray.unbind();
-		m_indexBuffer.unbind();
-	}
+        const GLuint indices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
 
-	//очистка буферов
-	Sprite::~Sprite() {
-	}
+        m_vertexCoordsBuffer.init(vertexCoords, 2 * 4 * sizeof(GLfloat));
+        VertexBufferLayout vertexCoordsLayout;
+        vertexCoordsLayout.addElementLayoutFloat(2, false);
+        m_vertexArray.addBuffer(m_vertexCoordsBuffer, vertexCoordsLayout);
 
-	//отрисовка спрайта
-	void Sprite::render() const {
-		m_pShaderProgram->use();//Активация шейдера
+        m_textureCoordsBuffer.init(textureCoords, 2 * 4 * sizeof(GLfloat));
+        VertexBufferLayout textureCoordsLayout;
+        textureCoordsLayout.addElementLayoutFloat(2, false);
+        m_vertexArray.addBuffer(m_textureCoordsBuffer, textureCoordsLayout);
 
-		glm::mat4 model(1.f);//создание матрицы
+        m_indexBuffer.init(indices, 6);
 
-		//Перемещение в точку, потом на 0.5 от размера, поворот, возврат на -0.5 от размера, увеличение
-		model = glm::translate(model, glm::vec3(m_position, 0.f));
-		model = glm::translate(model, glm::vec3( 0.5f * m_size.x,  0.5f * m_size.y, 0.f));
-		model = glm::rotate(model, glm::radians(m_rotation), glm::vec3(0.f, 0.f, 1.f));
-		model = glm::translate(model, glm::vec3(-0.5f * m_size.x, -0.5f * m_size.y, 0.f));
-		model = glm::scale(model, glm::vec3(m_size, 1.f));
+        m_vertexArray.unbind();
+        m_indexBuffer.unbind();
+    }
 
-		m_vertexArray.bind();
-		m_pShaderProgram->setMatrix4("modelMat", model);//передача полученой матрицы в шейдер
+    Sprite::~Sprite()
+    {
+    }
 
-		glActiveTexture(GL_TEXTURE0);//установка текстуры
-		m_pTexture->bind();//установка таргета на текстуру в памяти
+    void Sprite::render(const glm::vec2& position, const glm::vec2& size, const float rotation) const
+    {
+        m_pShaderProgram->use();
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,nullptr);
-		m_vertexArray.unbind();
-	}
+        glm::mat4 model(1.f);
 
-	//установка позиции
-	void Sprite::setPosition(const glm::vec2& position) {
-		m_position = position;
-	}
+        model = glm::translate(model, glm::vec3(position, 0.f));
+        model = glm::translate(model, glm::vec3(0.5f * size.x, 0.5f * size.y, 0.f));
+        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.f, 0.f, 1.f));
+        model = glm::translate(model, glm::vec3(-0.5f * size.x, -0.5f * size.y, 0.f));
+        model = glm::scale(model, glm::vec3(size, 1.f));
 
-	//установка размера
-	void Sprite::setSize(const glm::vec2& size) {
-		m_size = size;
-	}
+        m_pShaderProgram->setMatrix4("modelMat", model);
 
-	//установка поворота
-	void Sprite::setRotation(const float rotation) {
-		m_rotation = rotation;
-	}
+        glActiveTexture(GL_TEXTURE0);
+        m_pTexture->bind();
+
+        RenderEngine::draw(m_vertexArray, m_indexBuffer, *m_pShaderProgram);
+    }
 }

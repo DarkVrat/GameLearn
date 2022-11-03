@@ -4,12 +4,17 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <rapidjson/document.h>
+#include "../Renderer/Sprite.h"
+#include "../Renderer/ShaderProgram.h"
+#include "../Renderer/Texture2D.h"
+#include "../Renderer/StateAnimation.h"
 
 namespace Renderer {
 	class ShaderProgram;
 	class Texture2D;
 	class Sprite;
-	class AnimSprite;
+	class StateAnimation;
 }
 
 class ResourceManager {
@@ -32,14 +37,18 @@ public:
 	static std::shared_ptr<Renderer::Texture2D> loadTexture(const std::string& textureName, const std::string& texturePatn);
 	static std::shared_ptr<Renderer::Texture2D> getTexture(const std::string& textureName);
 
-	static std::shared_ptr<Renderer::Sprite> loadSprite(const std::string& spriteName, const std::string& textureName, const std::string& shaderName, const unsigned int spriteWidth, const unsigned int spriteHeight, const std::string& subTextureName = "Default");
+	static std::shared_ptr<Renderer::Sprite> loadSprite(const std::string& spriteName, const std::string& textureName, const std::string& shaderName, const std::string& subTextureName = "Default");
 	static std::shared_ptr<Renderer::Sprite> getSprite(const std::string& spriteName);
 
-	static std::shared_ptr<Renderer::AnimSprite> loadAnimSprite(const std::string& animSpriteName, const std::string& textureName, const std::string& shaderName, const unsigned int spriteWidth, const unsigned int spriteHeight, const std::string& subTextureName = "Default");
-	static std::shared_ptr<Renderer::AnimSprite> getAnimSprite(const std::string& animSpriteName);
+	static std::shared_ptr<Renderer::StateAnimation> loadStateAnimation(const std::string& spriteName, std::vector<std::pair<std::string, uint64_t>> frames, std::vector<std::string> sources, bool uninterrupted);
+	static std::shared_ptr<Renderer::StateAnimation> getStateAnimation(const std::string& spriteName);
 
 	//создание текстурного атласа
 	static std::shared_ptr<Renderer::Texture2D> loadTextureAtlas(std::string textureName,std::string texturePatn,std::vector<std::string> subTextures,const unsigned subWidth,const unsigned subHeigth);
+
+	static rapidjson::Document loadJSONDoc(const std::string& JSONPath);
+	static bool loadJSONResurces(const std::string& JSONPath);
+	static bool checkJSONResurces(const std::string& JSONPath);
 
 private:
 	//функци€ получени€ данных из файла
@@ -47,13 +56,13 @@ private:
 
 	//ќбъ€вление типов Map дл€ хранени€ Shared_ptr указателей наших типов.
 	typedef std::map<const std::string, std::shared_ptr<Renderer::Sprite>> SpriteMap;
+	typedef std::map<const std::string, std::shared_ptr<Renderer::StateAnimation>> StateAnimationMap;
 	typedef std::map<const std::string, std::shared_ptr<Renderer::Texture2D>> TexturesMap;
-	typedef std::map<const std::string, std::shared_ptr<Renderer::AnimSprite>> AnimSpriteMap;
 	typedef std::map<const std::string, std::shared_ptr<Renderer::ShaderProgram>> ShaderProgramsMap;
 	//’ранение всех данных загруженных в программу
 	static SpriteMap m_sprite;
+	static StateAnimationMap m_stateAnimation;
 	static TexturesMap m_textures;
-	static AnimSpriteMap m_animSprite;
 	static ShaderProgramsMap m_shaderPrograms;
 	//путь к папке с игрой
 	static std::string m_path;
