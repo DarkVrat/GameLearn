@@ -32,6 +32,8 @@ add_executable(${PROJECT}
 	src/GameClass/MainGameClass.h
 	src/GameClass/GameObject.cpp
 	src/GameClass/GameObject.h
+	src/GameClass/StateController.cpp
+	src/GameClass/StateController.h
 )
 
 target_compile_features(${PROJECT} PUBLIC cxx_std_17)

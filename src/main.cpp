@@ -71,12 +71,22 @@ int main(int argc, char** argv){
 
         //Таймер
         auto lastTime = std::chrono::high_resolution_clock::now();
-
+        int i = 0;
+        uint64_t t= 0;
         while (!glfwWindowShouldClose(PWindow)) {
             auto currTime = std::chrono::high_resolution_clock::now();//Обновление таймера
             uint64_t dura = std::chrono::duration_cast<std::chrono::nanoseconds>(currTime - lastTime).count();//Просчёт изменившегося времени
             lastTime = currTime;//сдвиг таймера
+            
+            t += dura;
+            i++;
+            g_Game.update(dura);
 
+            if (t > 1000000000) {
+                std::cerr << "fps: " << i << std::endl;
+                t -= 1000000000;
+                i = 0;
+            }
             //Заполнение цветом указаном в glClearColor
             Renderer::RenderEngine::clear();
 
@@ -85,6 +95,7 @@ int main(int argc, char** argv){
 
             glfwSwapBuffers(PWindow);//Меняет буферы отрисовки
             glfwPollEvents();//Обработка событий
+            g_Game.Events();
         }
         ResourceManager::unloadAllRes();
     }

@@ -9,12 +9,16 @@ public:
 	MainGameClass(const glm::ivec2& window);
 	~MainGameClass();
 
+	void update(uint64_t duration);
 	void render();
+
 	void setKey(const int key,const int action);
 	bool init();
+	void Events();
 
 private:
 	std::array<bool, 349> m_keys;
+	std::vector<GameObject> m_GObject;
 
 	enum class E_GAME_STATE {
 		Active,

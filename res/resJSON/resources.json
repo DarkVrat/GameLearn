@@ -51,8 +51,8 @@
 					"subTexture":"Attack1_4"
 				},
 				{
-					"nameSprite":"S_Attack1_4",
-					"subTexture":"Attack1_4"
+					"nameSprite":"S_Attack1_5",
+					"subTexture":"Attack1_5"
 				},
 				{
 					"nameSprite":"S_Idle_1",
@@ -110,7 +110,8 @@
 			"uninterrupted":false,
 			"nextState":"Idle",
 			"sources":[
-				"Attack1"
+				"Attack1",
+				"Idle"
 			],
 			"frames":[
 				{
