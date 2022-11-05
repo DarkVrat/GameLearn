@@ -19,7 +19,7 @@ MainGameClass::MainGameClass(const glm::ivec2& window) :m_GState(E_GAME_STATE::A
 MainGameClass::~MainGameClass() {
 }
 
-void MainGameClass::update(uint64_t duration){
+void MainGameClass::update(double duration){
     for (auto current : m_GObject) {
         current.update(duration);
     }
@@ -40,15 +40,15 @@ bool MainGameClass::init() {
 
     auto pSpriteShaderProgram = ResourceManager::getShader("spriteShader");
 
-    m_GObject.emplace_back(glm::vec2(0, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(128, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(256, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(384, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(512, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(640, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(768, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(896, 100), glm::vec2(128, 128), 0.f, "Attack1");
-    m_GObject.emplace_back(glm::vec2(1024, 100), glm::vec2(128, 128), 0.f, "Attack1");
+    m_GObject.emplace_back("Attack1", glm::vec2(0, 100), glm::vec2(256, 256), 0.f, -4.f);
+    m_GObject.emplace_back("Attack1", glm::vec2(60, 100), glm::vec2(256, 256), 0.f, -3.f);
+    m_GObject.emplace_back("Attack1", glm::vec2(120, 100), glm::vec2(256, 256), 0.f, -2.f);
+    m_GObject.emplace_back("Attack1", glm::vec2(180, 100), glm::vec2(256, 256), 0.f, -1.f);
+    m_GObject.emplace_back("Attack1", glm::vec2(240, 100), glm::vec2(256, 256), 0.f, 0.f);
+    m_GObject.emplace_back("Attack1", glm::vec2(300, 100), glm::vec2(256, 256), 0.f, -0.1f);
+    m_GObject.emplace_back("Attack1", glm::vec2(360, 100), glm::vec2(256, 256), 0.f, -0.2f);
+    m_GObject.emplace_back("Attack1", glm::vec2(420, 100), glm::vec2(256, 256), 0.f, -0.3f);
+    m_GObject.emplace_back("Attack1", glm::vec2(480, 100), glm::vec2(256, 256), 0.f, -0.4f);
 
     //Матрица для шейдера
     glm::mat4 projectionMatrix = glm::ortho(0.f, static_cast<float>(m_window.x), 0.f, static_cast<float>(m_window.y), -100.f, 100.f);

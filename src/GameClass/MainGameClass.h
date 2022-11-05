@@ -9,7 +9,7 @@ public:
 	MainGameClass(const glm::ivec2& window);
 	~MainGameClass();
 
-	void update(uint64_t duration);
+	void update(double duration);
 	void render();
 
 	void setKey(const int key,const int action);

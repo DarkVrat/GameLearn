@@ -40,7 +40,7 @@ public:
 	static std::shared_ptr<Renderer::Sprite> loadSprite(const std::string& spriteName, const std::string& textureName, const std::string& shaderName, const std::string& subTextureName = "Default");
 	static std::shared_ptr<Renderer::Sprite> getSprite(const std::string& spriteName);
 
-	static std::shared_ptr<Renderer::StateAnimation> loadStateAnimation(const std::string& spriteName, std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, uint64_t>> frames, std::vector<std::string> sources, std::string nextState, bool uninterrupted);
+	static std::shared_ptr<Renderer::StateAnimation> loadStateAnimation(const std::string& spriteName, std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, double>> frames, std::vector<std::string> sources, std::string nextState, bool uninterrupted);
 	static std::shared_ptr<Renderer::StateAnimation> getStateAnimation(const std::string& spriteName);
 
 	//создание текстурного атласа

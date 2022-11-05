@@ -134,7 +134,7 @@ std::shared_ptr<Renderer::Sprite> ResourceManager::getSprite(const std::string& 
 
 
 //-------------------------------StateAnimation------------------------------------//
-std::shared_ptr<Renderer::StateAnimation> ResourceManager::loadStateAnimation(const std::string& stateName, std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, uint64_t>> frames, std::vector<std::string> sources, std::string nextState, bool uninterrupted) {
+std::shared_ptr<Renderer::StateAnimation> ResourceManager::loadStateAnimation(const std::string& stateName, std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, double>> frames, std::vector<std::string> sources, std::string nextState, bool uninterrupted) {
 	std::shared_ptr<Renderer::StateAnimation> newStateAnimation = m_stateAnimation.emplace(stateName, std::make_shared<Renderer::StateAnimation>(frames, sources,nextState, uninterrupted)).first->second;
 	return nullptr;
 }
@@ -255,10 +255,10 @@ bool ResourceManager::loadJSONResurces(const std::string& JSONPath){
 			}
 
 			const auto framesArray = currentStateAnimation["frames"].GetArray();
-			std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, uint64_t>> framesVector;
+			std::vector<std::pair<std::shared_ptr<Renderer::Sprite>, double>> framesVector;
 			framesVector.reserve(framesArray.Size());
 			for (const auto& currentFrame : framesArray) {
-				framesVector.emplace_back(std::make_pair<std::shared_ptr<Renderer::Sprite>,uint64_t>(getSprite(currentFrame["sprite"].GetString()), currentFrame["duration"].GetUint()*1000000));
+				framesVector.emplace_back(std::make_pair<std::shared_ptr<Renderer::Sprite>,uint64_t>(getSprite(currentFrame["sprite"].GetString()), currentFrame["duration"].GetDouble()));
 			}
 
 			loadStateAnimation(nameState, framesVector, sourcesVector, nextState, uninterrupted);

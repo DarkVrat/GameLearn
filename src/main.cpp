@@ -64,6 +64,7 @@ int main(int argc, char** argv){
     std::cout << "OpenGL version: " << Renderer::RenderEngine::getVersion() << std::endl;
 
     Renderer::RenderEngine::setClearColor(0.5f, 0.5f, 0.5f, 1.0f);//цвет заполнения
+    Renderer::RenderEngine::setDetphTest(true);
     {
         ResourceManager::setExecutablePath(argv[0]);//Передача пути к программе
        
@@ -72,19 +73,19 @@ int main(int argc, char** argv){
         //Таймер
         auto lastTime = std::chrono::high_resolution_clock::now();
         int i = 0;
-        uint64_t t= 0;
+        double t= 0;
         while (!glfwWindowShouldClose(PWindow)) {
             auto currTime = std::chrono::high_resolution_clock::now();//Обновление таймера
-            uint64_t dura = std::chrono::duration_cast<std::chrono::nanoseconds>(currTime - lastTime).count();//Просчёт изменившегося времени
+            double dura = std::chrono::duration<double, std::milli>(currTime - lastTime).count();//Просчёт изменившегося времени
             lastTime = currTime;//сдвиг таймера
             
             t += dura;
             i++;
             g_Game.update(dura);
 
-            if (t > 1000000000) {
+            if (t > 1000.0) {
                 std::cerr << "fps: " << i << std::endl;
-                t -= 1000000000;
+                t -= 1000.0;
                 i = 0;
             }
             //Заполнение цветом указаном в glClearColor

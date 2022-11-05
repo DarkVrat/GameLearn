@@ -77,6 +77,11 @@ namespace Renderer {
 		glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value); 
 	}
 
+	void ShaderProgram::setFloat (const std::string& name, const GLfloat value) {
+		//ѕолучение адреса юниформ переменной шейдера по name, и установка ей значени€
+ 		glUniform1f(glGetUniformLocation(m_ID, name.c_str()), value);
+	}
+
 	void ShaderProgram::setMatrix4(const std::string& name, const glm::mat4& matrix){
 		//ѕолучение адреса юниформ переменной шейдера по name, указание количества mat4 матриц, указание о ненадобности транспоритровани€ матриц, и загрузка матрицы в переменную
 		glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()),1,GL_FALSE, glm::value_ptr(matrix));

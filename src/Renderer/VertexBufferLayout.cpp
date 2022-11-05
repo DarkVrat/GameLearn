@@ -10,7 +10,7 @@ namespace Renderer {
 	}
 
 	void VertexBufferLayout::addElementLayoutFloat(const unsigned int count, const bool normalized){
-		m_layoutElements.push_back({static_cast<GLint> (count),GL_FLOAT,normalized, count*sizeof(GLfloat) });
+		m_layoutElements.push_back({static_cast<GLint> (count),GL_FLOAT,normalized, count* static_cast<unsigned int>(sizeof(GLfloat)) });
 		m_stride += m_layoutElements.back().m_size;
 	}
 }

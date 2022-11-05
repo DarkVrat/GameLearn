@@ -44,7 +44,7 @@ void StateController::setState(const std::string nextState){
 	}
 }
 
-void StateController::update(uint64_t duration){
+void StateController::update(double duration){
 	m_time += duration;
 	while (m_time > m_durationFrame) {
 		m_time -= m_durationFrame;
@@ -55,6 +55,6 @@ void StateController::update(uint64_t duration){
 	}
 }
 
-void StateController::render(glm::vec2& position, glm::vec2& size, float rotation){
-	m_Sprites[m_indexFrame].first->render(position, size, rotation);
+void StateController::render(glm::vec2& position, glm::vec2& size, float rotation, float layer){
+	m_Sprites[m_indexFrame].first->render(position, size, rotation, layer);
 }

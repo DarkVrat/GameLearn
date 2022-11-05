@@ -10,6 +10,7 @@ namespace Renderer {
 	public:
 		static void draw(const VertexArray& vertexArray, const IndexBuffer& indesBuffer, const ShaderProgram& shader);
 		static void setClearColor(float r, float g, float b, float a);
+		static void setDetphTest(bool flag);
 		static void clear();
 		static void setViewport(unsigned int width, unsigned int height, unsigned intleftOffset=0, unsigned int bottomOffset=0);
 

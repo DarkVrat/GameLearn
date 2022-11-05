@@ -22,7 +22,7 @@ namespace Renderer {
 		~Sprite();
 		
 		//отрисовка
-		void render(const glm::vec2& position, const glm::vec2& size, const float rotation)const;
+		void render(const glm::vec2& position, const glm::vec2& size, const float rotation, const float layer)const;
 
 	protected:
 		std::shared_ptr<Texture2D> m_pTexture; //текстура
